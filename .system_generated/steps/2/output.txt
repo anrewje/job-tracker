@@ -1,0 +1,4 @@
+A1: Linux (Ubuntu, CentOS, Debian и т.д.), Windows Server (AD, DNS, DHCP, GPO), Cisco (маршрутизаторы, коммутаторы, Packet Tracer), Сетевые протоколы (TCP/IP, OSPF, BGP, VLAN, VPN), Виртуализация (VMware, VirtualBox, Hyper-V), Docker / контейнеры, Python / Bash скрипты, Мониторинг (Zabbix, Nagios, Grafana), Информационная безопасность / firewall
+A2: Да, настраивал сети в Cisco Packet Tracer / GNS3, Да, писал скрипты для автоматизации, Да, делал курсовые / дипломные проекты
+A3: Junior системный администратор, Junior сетевой инженер / NOC, Junior DevOps / инфраструктура
+A4: hh.ru (HeadHunter), habr.com/career, superjob.ru, remote.ru / remoteok, remote.com , instahyre, hirify, авито.

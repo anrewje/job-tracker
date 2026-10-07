@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Интерактивный трекер поиска работы и практики — Андрей Мелехов</title>
+<style>
+  :root {
+    --bg-main: #0f172a;
+    --card-bg: #1e293b;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border-color: #334155;
+    --primary: #3b82f6;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0 24px 24px 24px;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+  }
+
+  /* Фиксированный хеддер страницы сверху */
+  .sticky-header-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 20px;
+  }
+
+  .sticky-header-bar .title-group h1 {
+    margin: 0 0 4px 0;
+    font-size: 20px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sticky-header-bar .title-group p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  .db-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #4ade80;
+    background: rgba(34, 197, 94, 0.15);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+  }
+
+  .btn-add {
+    background: #6366f1;
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: background 0.2s;
+  }
+  .btn-add:hover { background: #4f46e5; }
+
+  /* Карточки статистики */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--card-bg);
+    padding: 16px 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+  }
+  .stat-card .num { font-size: 28px; font-weight: 700; margin-bottom: 4px; display: block; }
+  .stat-card .label { color: var(--text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Фильтры и поиск */
+  .controls-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    align-items: center;
+  }
+  .search-input {
+    flex: 1;
+    min-width: 240px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  .search-input:focus { outline: none; border-color: var(--primary); }
+
+  .filter-btn {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn.active, .filter-btn:hover {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+
+  .btn-export {
+    background: #10b981;
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: auto;
+  }
+  .btn-export:hover { background: #059669; }
+
+  /* Таблица */
+  .table-container {
+    background: var(--card-bg);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    text-align: left;
+    font-size: 14px;
+  }
+  
+  thead th {
+    position: sticky;
+    top: 72px;
+    z-index: 50;
+    background: #1e293b !important;
+    padding: 14px 14px;
+    color: #94a3b8;
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    border-bottom: 2px solid #475569;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+  }
+
+  /* Цветовая индикация строк */
+  tr { transition: background-color 0.2s; }
+  tr.status-yes { background-color: rgba(34, 197, 94, 0.22) !important; }
+  tr.status-no { background-color: rgba(239, 68, 68, 0.22) !important; }
+  tr.status-noemail { background-color: rgba(245, 158, 11, 0.22) !important; }
+  tr.is-sent { background-color: rgba(59, 130, 246, 0.1); }
+
+  .custom-checkbox {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--primary);
+    cursor: pointer;
+  }
+
+  .status-select {
+    background: #0f172a;
+    color: #fff;
+    border: 1px solid var(--border-color);
+    padding: 7px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .status-select.val-yes { background: #14532d; color: #4ade80; border-color: #22c55e; }
+  .status-select.val-no { background: #7f1d1d; color: #f87171; border-color: #ef4444; }
+  .status-select.val-noemail { background: #78350f; color: #fbbf24; border-color: #f59e0b; }
+
+  .channel-select {
+    background: #0f172a;
+    color: #94a3b8;
+    border: 1px solid var(--border-color);
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    margin-bottom: 4px;
+  }
+
+  .note-input {
+    background: #0f172a;
+    border: 1px solid var(--border-color);
+    color: #e2e8f0;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    width: 100%;
+  }
+  .note-input:focus { outline: none; border-color: var(--primary); }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 7px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+  .badge-sakhalin { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+  .badge-remote { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); }
+  .badge-custom { background: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.4); }
+
+  .email-copy {
+    font-family: monospace;
+    background: #0f172a;
+    padding: 3px 6px;
+    border-radius: 4px;
+    color: #38bdf8;
+    user-select: all;
+    display: inline-block;
+    border: 1px dashed #334155;
+    font-size: 12px;
+  }
+
+  .btn-scroll-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #3b82f6;
+    color: #fff;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    z-index: 999;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .btn-scroll-top:hover {
+    background: #2563eb;
+    transform: translateY(-3px);
+  }
+
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  .modal-box {
+    background: #1e293b;
+    border: 1px solid var(--border-color);
+    padding: 24px;
+    border-radius: 12px;
+    width: 480px;
+    max-width: 90%;
+  }
+  .modal-box h2 { margin-top: 0; margin-bottom: 16px; font-size: 18px; color: #fff; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; }
+  .form-group input, .form-group select {
+    width: 100%;
+    background: #0f172a;
+    border: 1px solid var(--border-color);
+    color: #fff;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  .btn-cancel { background: #334155; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; }
+  .btn-save { background: #3b82f6; color: #fff; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="sticky-header-bar">
+  <div class="title-group">
+    <h1>🚀 Трекер откликов: Работа и Практика <span class="db-status" id="db-indicator">💾 SQLite DB</span></h1>
+    <p>Кандидат: <strong>Андрей Мелехов</strong> | Специальность: Сетевое и системное администрирование (СПЭТ)</p>
+  </div>
+  <button class="btn-add" onclick="openModal()">➕ Добавить свою компанию</button>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <span class="num" style="color: #60a5fa;" id="stat-total">50</span>
+    <span class="label">Всего компаний</span>
+  </div>
+  <div class="stat-card">
+    <span class="num" style="color: #38bdf8;" id="stat-sent">0</span>
+    <span class="label">Отправлено</span>
+  </div>
+  <div class="stat-card">
+    <span class="num" style="color: #4ade80;" id="stat-yes">0</span>
+    <span class="label">Ответили (✅)</span>
+  </div>
+  <div class="stat-card">
+    <span class="num" style="color: #f87171;" id="stat-no">0</span>
+    <span class="label">Отказы (❌)</span>
+  </div>
+  <div class="stat-card">
+    <span class="num" style="color: #fbbf24;" id="stat-noemail">0</span>
+    <span class="label">Нет почты (⚠️)</span>
+  </div>
+</div>
+
+<div class="controls-bar">
+  <input type="text" id="search-box" class="search-input" placeholder="🔍 Быстрый поиск по названию, почте, заметке..." oninput="handleSearch()">
+  <button class="filter-btn active" onclick="setFilter('all', this)">Все</button>
+  <button class="filter-btn" onclick="setFilter('sakhalin', this)">📍 Сахалин</button>
+  <button class="filter-btn" onclick="setFilter('remote', this)">🌐 Удалёнка</button>
+  <button class="filter-btn" onclick="setFilter('custom', this)">⭐ Добавленные мной</button>
+  <button class="filter-btn" onclick="setFilter('sent', this)">☑️ Отправленные</button>
+  <button class="filter-btn" onclick="setFilter('error', this)">⚠️ Ошибки почты</button>
+  <button class="btn-export" onclick="exportCSV()">📥 Экспорт в Excel (.csv)</button>
+</div>
+
+<div class="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 35px;">№</th>
+        <th style="width: 80px; text-align: center;">Отправлено</th>
+        <th style="width: 170px;">Ответ компании</th>
+        <th style="width: 220px;">Способ / Заметка 📝</th>
+        <th>Компания</th>
+        <th>Регион</th>
+        <th>Контакты / Ссылка</th>
+        <th>Сфера и позиция</th>
+      </tr>
+    </thead>
+    <tbody id="table-body">
+    </tbody>
+  </table>
+</div>
+
+<button class="btn-scroll-top" id="scroll-top-btn" onclick="scrollToTop()" title="Вернуться в самый верх">↑</button>
+
+<div class="modal-overlay" id="add-modal">
+  <div class="modal-box">
+    <h2>➕ Добавить компанию в базу данных</h2>
+    <div class="form-group">
+      <label>Название компании *</label>
+      <input type="text" id="modal-name" placeholder="Например: Яндекс, Местный банк, Сервисный центр...">
+    </div>
+    <div class="form-group">
+      <label>Регион</label>
+      <select id="modal-region">
+        <option value="Сахалин">Мой регион (Сахалин)</option>
+        <option value="Удалённо">Удалённо / Другой регион</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Как отправлял / планируешь отправить?</label>
+      <select id="modal-channel">
+        <option value="email">📧 Напрямую на Email</option>
+        <option value="site">🌐 Через сайт / анкету компании</option>
+        <option value="hh">💼 Через HeadHunter (hh.ru)</option>
+        <option value="tg">✈️ В Telegram HR/лиду</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Контакты (Email или ссылка на сайт)</label>
+      <input type="text" id="modal-contact" placeholder="hr@company.ru или ссылка на вакансию">
+    </div>
+    <div class="form-group">
+      <label>Заметка / Детали</label>
+      <input type="text" id="modal-note" placeholder="Отправил через форму откликов / резюме с сопроводительным">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Отмена</button>
+      <button class="btn-save" onclick="saveNewCompany()">Сохранить в БД</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const defaultList = [
+  { id: 1, name: "Солнце Телеком (ООО «Связь»)", region: "Сахалин", isSakhalin: true, sphere: "Интернет-провайдер, телеком", email: "info@solnce-telecom.ru", role: "Техник связи, дежурный инженер, монтажник СКС" },
+  { id: 2, name: "ПАО «Ростелеком» (Сахалин)", region: "Сахалин", isSakhalin: true, sphere: "Оператор связи, дата-центры", email: "dfo@rt.ru", role: "Специалист техподдержки, электромеханик" },
+  { id: 3, name: "Портал Sakh.com (Сах.ком)", region: "Сахалин", isSakhalin: true, sphere: "ИТ-сервисы, веб-серверы", email: "job@sakh.com", role: "Помощник сисадмина, техподдержка" },
+  { id: 4, name: "ООО «Интерра» (ИТ-Аутсорсинг)", region: "Сахалин", isSakhalin: true, sphere: "ИТ-обслуживание организаций, сети", email: "info@interra-sakhalin.ru", role: "Младший сисадмин, помощник инженера" },
+  { id: 5, name: "ТрансТелеКом (ТТК-Сахалин)", region: "Сахалин", isSakhalin: true, sphere: "Магистральный оператор связи", email: "post@sakhalin.ttk.ru", role: "Сетевой техник, дежурный оператор" },
+  { id: 6, name: "«Сахалинская Энергия» (Sakhalin Energy)", region: "Сахалин", isSakhalin: true, sphere: "Нефтегазовый холдинг, IT/NOC", email: "recruitment@sakhalinenergy.ru", role: "Стажер в отдел IT / Телекоммуникаций" },
+  { id: 7, name: "Сахалин-ИнфоТех", region: "Сахалин", isSakhalin: true, sphere: "Системная интеграция, серверы", email: "info@sakhinfotech.ru", role: "Помощник инженера, специалист внедрения" },
+  { id: 8, name: "Первый Бит (Южно-Сахалинск)", region: "Сахалин", isSakhalin: true, sphere: "Автоматизация, серверы 1С, сети", email: "yuzhno-sakhalinsk@1cbit.ru", role: "Младший системный администратор" },
+  { id: 9, name: "Минцифры Сахалинской области", region: "Сахалин", isSakhalin: true, sphere: "Госсектор, ИТ и связь", email: "it@sakhalin.gov.ru", role: "Стажер отдела инфраструктуры и связи" },
+  { id: 10, name: "ГБУ «Сахалинский ИТ-центр» (ИТ-парк)", region: "Сахалин", isSakhalin: true, sphere: "Региональный ИТ-кластер", email: "it-park@sakhalin.gov.ru", role: "Младший системный инженер" },
+  { id: 11, name: "Сахалинское морское пароходство (SASCO)", region: "Сахалин", isSakhalin: true, sphere: "Логистика, корпоративная сеть", email: "kadr@sasco.ru", role: "Помощник системного администратора" },
+  { id: 12, name: "Аэровокзал Южно-Сахалинск (Аэропорт)", region: "Сахалин", isSakhalin: true, sphere: "Сетевые системы аэропорта", email: "kadr@airportus.ru", role: "Техник по связи и ИТ-оборудованию" },
+  { id: 13, name: "СахГУ (Сахалинский госуниверситет)", region: "Сахалин", isSakhalin: true, sphere: "Кампусная сеть, образование", email: "it@sakhgu.ru", role: "Специалист техподдержки лабораторий" },
+  { id: 14, name: "АО «Сахалинская нефтяная компания»", region: "Сахалин", isSakhalin: true, sphere: "ТЭК, офисная сеть", email: "info@sakhoil.ru", role: "Помощник системного администратора" },
+  { id: 15, name: "ООО «ДальСвязь-Сахалин»", region: "Сахалин", isSakhalin: true, sphere: "Монтаж слаботочных сетей, СКС", email: "dalsvyaz-sakh@mail.ru", role: "Монтажник сетей, техник СКС" },
+  { id: 16, name: "ПАО «Сахалинэнерго» (РусГидро)", region: "Сахалин", isSakhalin: true, sphere: "Энергетика, телемеханика, сеть", email: "kanc@sahen.ru", role: "Стажер группы информационных технологий" },
+  { id: 17, name: "МТС (Сахалинский филиал)", region: "Сахалин", isSakhalin: true, sphere: "Мобильная и фиксированная связь", email: "job@mts.ru", role: "Специалист эксплуатации фиксированной сети" },
+  { id: 18, name: "МегаФон (Сахалинский филиал)", region: "Сахалин", isSakhalin: true, sphere: "Сети связи, оптоволокно", email: "job@megafon.ru", role: "Инженер оборудования связи" },
+  { id: 19, name: "Билайн (ВымпелКом, Сахалин)", region: "Сахалин", isSakhalin: true, sphere: "Интернет-провайдер ШПД", email: "job@beeline.ru", role: "Техник подключения, техподдержка" },
+  { id: 20, name: "ООО «ИТ-Сервис Сахалин»", region: "Сахалин", isSakhalin: true, sphere: "Обслуживание ПК организаций", email: "service@it-sakh.ru", role: "Сервисный инженер, эникейщик" },
+  { id: 21, name: "Администрация г. Южно-Сахалинска", region: "Сахалин", isSakhalin: true, sphere: "Муниципальный отдел информатизации", email: "kadr@yuzhno-sakh.ru", role: "Практикант отдела ИТ и связи" },
+  { id: 22, name: "Сеть супермаркетов «Первый Семейный»", region: "Сахалин", isSakhalin: true, sphere: "Ритейл, серверы магазинов", email: "hr@1semeyny.ru", role: "Помощник системного администратора" },
+  { id: 23, name: "«Гидрострой» (Сахалинский офис)", region: "Сахалин", isSakhalin: true, sphere: "Крупный холдинг, филиалы", email: "office@gidrostroy.com", role: "Младший сисадмин, специалист Helpdesk" },
+  { id: 24, name: "«Газпром газораспределение Сахалин»", region: "Сахалин", isSakhalin: true, sphere: "Сетевая инфраструктура", email: "info@sakhalin-gaz.ru", role: "Специалист технической поддержки" },
+  { id: 25, name: "Сахалинская обл. клиническая больница", region: "Сахалин", isSakhalin: true, sphere: "Здравоохранение, масштабная ЛВС", email: "sakh-okb@sakhalin.gov.ru", role: "Младший техник информационных систем" },
+  { id: 26, name: "Beget (Бегет)", region: "Удалённо", isSakhalin: false, sphere: "Хостинг-провайдер РФ, веб-серверы", email: "job@beget.com", role: "Инженер техподдержки хостинга (Linux)" },
+  { id: 27, name: "FirstVDS / ISPsystem", region: "Удалённо", isSakhalin: false, sphere: "VDS/VPS серверы, KVM", email: "job@firstvds.ru", role: "Инженер техподдержки Linux" },
+  { id: 28, name: "Selectel (Селектел)", region: "Удалённо", isSakhalin: false, sphere: "Облачный провайдер, дата-центры", email: "job@selectel.ru", role: "Младший инженер поддержки облака" },
+  { id: 29, name: "REG.RU / Рунити", region: "Удалённо", isSakhalin: false, sphere: "Домены, хостинг, серверы", email: "hr@reg.ru", role: "Специалист поддержки и переноса данных" },
+  { id: 30, name: "SpaceWeb (СпейсВеб)", region: "Удалённо", isSakhalin: false, sphere: "Хостинг виртуальных серверов", email: "job@sweb.ru", role: "Специалист службы техподдержки" },
+  { id: 31, name: "TimeWeb (Таймвеб)", region: "Удалённо", isSakhalin: false, sphere: "Облачный хостинг, VDS/VPS", email: "hr@timeweb.ru", role: "Младший сисадмин, техподдержка" },
+  { id: 32, name: "Яндекс (Яндекс 360 / Облако)", region: "Удалённо", isSakhalin: false, sphere: "ИТ-гигант, дата-центры", email: "intern@yandex-team.ru", role: "Стажер отдела поддержки инфраструктуры" },
+  { id: 33, name: "VK (VK Cloud)", region: "Удалённо", isSakhalin: false, sphere: "ИТ-холдинг, облачные платформы", email: "internship@vk.team", role: "Младший инженер поддержки облака" },
+  { id: 34, name: "«РЕЛЭКС»", region: "Удалённо", isSakhalin: false, sphere: "СУБД, системная интеграция, сети", email: "job@relex.ru", role: "Младший сетевой администратор" },
+  { id: 35, name: "Астрал-Софт", region: "Удалённо", isSakhalin: false, sphere: "ЭДО, SaaS-решения", email: "hr@astral.ru", role: "Специалист техподдержки клиентов" },
+  { id: 36, name: "СервисКлауд (Scloud)", region: "Удалённо", isSakhalin: false, sphere: "1С в облаке, удаленные столы", email: "hr@scloud.ru", role: "Инженер 1–2 линии техподдержки" },
+  { id: 37, name: "Абарус (ABARUS_IT)", region: "Удалённо", isSakhalin: false, sphere: "Сетевые решения, мониторинг", email: "info@nso-it.ru", role: "Младший сетевой инженер / сисадмин" },
+  { id: 38, name: "Группа «Астра» (Astra Linux)", region: "Удалённо", isSakhalin: false, sphere: "Разработчик ОС Astra Linux", email: "hr@astra-linux.ru", role: "Специалист сопровождения Linux-систем" },
+  { id: 39, name: "РЕД СОФТ (РЕД ОС)", region: "Удалённо", isSakhalin: false, sphere: "Отечественные ОС и СУБД", email: "info@red-soft.ru", role: "Младший специалист поддержки РЕД ОС" },
+  { id: 40, name: "Базальт СПО (ALT Linux)", region: "Удалённо", isSakhalin: false, sphere: "Разработчик ALT Linux", email: "job@basealt.ru", role: "Специалист техподдержки пользователей" },
+  { id: 41, name: "АЙ ТИ ОНТАЙМ", region: "Удалённо", isSakhalin: false, sphere: "ИТ-аутсорсинг и удаленная поддержка", email: "job@it-ontime.ru", role: "Стажер системного администратора" },
+  { id: 42, name: "ИнфраТех", region: "Удалённо", isSakhalin: false, sphere: "Инфраструктурные решения", email: "hr@infratech.ru", role: "Стажер инженера техподдержки" },
+  { id: 43, name: "Aston (Астон)", region: "Удалённо", isSakhalin: false, sphere: "ИТ-консалтинг, разработка", email: "cv@astondevs.ru", role: "Стажер DevOps / Системный инженер" },
+  { id: 44, name: "ЭлектронТелеком", region: "Удалённо", isSakhalin: false, sphere: "Телекоммуникации, сети", email: "info@el-tel.ru", role: "Специалист техподдержки (сменный график)" },
+  { id: 45, name: "Positive Technologies", region: "Удалённо", isSakhalin: false, sphere: "Информационная безопасность, сети", email: "ptstart@ptsecurity.com", role: "Стажер в отдел сетевой безопасности" },
+  { id: 46, name: "Лаборатория Касперского", region: "Удалённо", isSakhalin: false, sphere: "Кибербезопасность, инфраструктура", email: "safeboard@kaspersky.com", role: "Стажер службы системного администрирования" },
+  { id: 47, name: "Компания «Светелка Хостинг»", region: "Удалённо", isSakhalin: false, sphere: "Хостинг, аренда Linux-серверов", email: "support@svetelka.ru", role: "Дежурный техник техподдержки" },
+  { id: 48, name: "Macloud", region: "Удалённо", isSakhalin: false, sphere: "Облачный хостинг серверов", email: "support@macloud.ru", role: "Инженер техподдержки облачной платформы" },
+  { id: 49, name: "AUXO (бывш. Atos)", region: "Удалённо", isSakhalin: false, sphere: "Системный интегратор", email: "hr@auxo.ru", role: "Младший инженер удаленной поддержки" },
+  { id: 50, name: "КРОК (CROC)", region: "Удалённо", isSakhalin: false, sphere: "Системная интеграция, сети, ЦОД", email: "job@croc.ru", role: "Стажер направления сетевой инфраструктуры" }
+];
+
+let customList = [];
+let allList = [...defaultList];
+let state = {};
+let currentFilter = 'all';
+let searchQuery = '';
+
+// Загрузка данных из SQLite через API
+async function loadDataFromDB() {
+  try {
+    const res = await fetch('/api/data');
+    if (res.ok) {
+      const data = await res.json();
+      state = data.states || {};
+      customList = data.customCompanies || [];
+      document.getElementById('db-indicator').innerText = '💾 SQLite DB: Активна';
+      document.getElementById('db-indicator').style.color = '#4ade80';
+    } else {
+      fallbackLocalStorage();
+    }
+  } catch (e) {
+    fallbackLocalStorage();
+  }
+  render();
+}
+
+function fallbackLocalStorage() {
+  document.getElementById('db-indicator').innerText = '📁 LocalStorage (БД офлайн)';
+  document.getElementById('db-indicator').style.color = '#fbbf24';
+  state = JSON.parse(localStorage.getItem('resume_tracker_v3') || '{}');
+  customList = JSON.parse(localStorage.getItem('resume_custom_companies') || '[]');
+}
+
+async function saveStateToDB(id) {
+  // Сохраняем и локально, и на бэкенд в SQLite
+  localStorage.setItem('resume_tracker_v3', JSON.stringify(state));
+  try {
+    const payload = {
+      id: id,
+      ...state[id]
+    };
+    await fetch('/api/save_state', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch (err) {
+    console.warn('Сервер БД недоступен, данные сохранены в браузере');
+  }
+}
+
+function render() {
+  allList = [...defaultList, ...customList];
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = '';
+
+  let countSent = 0;
+  let countYes = 0;
+  let countNo = 0;
+  let countNoEmail = 0;
+
+  allList.forEach(item => {
+    const s = state[item.id] || { sent: false, status: 'none', channel: 'email', note: '' };
+    if (s.sent) countSent++;
+    if (s.status === 'yes') countYes++;
+    if (s.status === 'no') countNo++;
+    if (s.status === 'noemail') countNoEmail++;
+
+    // Фильтры
+    if (currentFilter === 'sakhalin' && !item.isSakhalin) return;
+    if (currentFilter === 'remote' && item.isSakhalin) return;
+    if (currentFilter === 'custom' && !item.isCustom) return;
+    if (currentFilter === 'sent' && !s.sent) return;
+    if (currentFilter === 'error' && s.status !== 'noemail') return;
+
+    // Поиск
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const match = item.name.toLowerCase().includes(q) ||
+                    (item.email && item.email.toLowerCase().includes(q)) ||
+                    (s.note && s.note.toLowerCase().includes(q)) ||
+                    (item.sphere && item.sphere.toLowerCase().includes(q));
+      if (!match) return;
+    }
+
+    const tr = document.createElement('tr');
+    if (s.status === 'yes') tr.className = 'status-yes';
+    else if (s.status === 'no') tr.className = 'status-no';
+    else if (s.status === 'noemail') tr.className = 'status-noemail';
+    else if (s.sent) tr.className = 'is-sent';
+
+    let badgeClass = item.isSakhalin ? 'badge-sakhalin' : 'badge-remote';
+    if (item.isCustom) badgeClass = 'badge-custom';
+
+    let selectClass = '';
+    if (s.status === 'yes') selectClass = 'val-yes';
+    else if (s.status === 'no') selectClass = 'val-no';
+    else if (s.status === 'noemail') selectClass = 'val-noemail';
+
+    tr.innerHTML = `
+      <td style="color: var(--text-muted); font-weight: 600;">${item.id}</td>
+      <td style="text-align: center;">
+        <input type="checkbox" class="custom-checkbox" ${s.sent ? 'checked' : ''} onchange="toggleSent(${item.id}, this.checked)">
+      </td>
+      <td>
+        <select class="status-select ${selectClass}" onchange="setStatus(${item.id}, this.value)">
+          <option value="none" ${s.status === 'none' ? 'selected' : ''}>⏳ Ждем ответ</option>
+          <option value="yes" ${s.status === 'yes' ? 'selected' : ''}>✅ Да (Ответили)</option>
+          <option value="no" ${s.status === 'no' ? 'selected' : ''}>❌ Нет (Отказ)</option>
+          <option value="noemail" ${s.status === 'noemail' ? 'selected' : ''}>⚠️ Нет такой почты</option>
+        </select>
+      </td>
+      <td>
+        <select class="channel-select" onchange="setChannel(${item.id}, this.value)">
+          <option value="email" ${s.channel === 'email' ? 'selected' : ''}>📧 Через Email</option>
+          <option value="site" ${s.channel === 'site' ? 'selected' : ''}>🌐 Через Сайт компании</option>
+          <option value="hh" ${s.channel === 'hh' ? 'selected' : ''}>💼 Через hh.ru</option>
+          <option value="tg" ${s.channel === 'tg' ? 'selected' : ''}>✈️ В Telegram</option>
+        </select>
+        <input type="text" class="note-input" placeholder="Заметка (дата, коммент)..." value="${s.note || ''}" onchange="setNote(${item.id}, this.value)">
+      </td>
+      <td><strong style="color: #fff;">${item.name}</strong></td>
+      <td><span class="badge ${badgeClass}">${item.region}</span></td>
+      <td><span class="email-copy">${item.email || '—'}</span></td>
+      <td style="font-size: 13px; color: var(--text-muted);">${item.role || item.sphere || '—'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('stat-total').innerText = allList.length;
+  document.getElementById('stat-sent').innerText = countSent;
+  document.getElementById('stat-yes').innerText = countYes;
+  document.getElementById('stat-no').innerText = countNo;
+  document.getElementById('stat-noemail').innerText = countNoEmail;
+}
+
+function toggleSent(id, checked) {
+  if (!state[id]) state[id] = { sent: false, status: 'none', channel: 'email', note: '' };
+  state[id].sent = checked;
+  saveStateToDB(id);
+  render();
+}
+
+function setStatus(id, val) {
+  if (!state[id]) state[id] = { sent: false, status: 'none', channel: 'email', note: '' };
+  state[id].status = val;
+  if (val !== 'none') state[id].sent = true;
+  saveStateToDB(id);
+  render();
+}
+
+function setChannel(id, ch) {
+  if (!state[id]) state[id] = { sent: false, status: 'none', channel: 'email', note: '' };
+  state[id].channel = ch;
+  saveStateToDB(id);
+  render();
+}
+
+function setNote(id, noteVal) {
+  if (!state[id]) state[id] = { sent: false, status: 'none', channel: 'email', note: '' };
+  state[id].note = noteVal;
+  saveStateToDB(id);
+  render();
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function handleSearch() {
+  searchQuery = document.getElementById('search-box').value;
+  render();
+}
+
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('scroll-top-btn');
+  if (window.scrollY > 300) btn.style.display = 'flex';
+  else btn.style.display = 'none';
+});
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function openModal() {
+  document.getElementById('add-modal').style.display = 'flex';
+  document.getElementById('modal-name').focus();
+}
+
+function closeModal() {
+  document.getElementById('add-modal').style.display = 'none';
+  document.getElementById('modal-name').value = '';
+  document.getElementById('modal-contact').value = '';
+  document.getElementById('modal-note').value = '';
+}
+
+async function saveNewCompany() {
+  const name = document.getElementById('modal-name').value.trim();
+  if (!name) {
+    alert('Пожалуйста, введите название компании!');
+    return;
+  }
+  const region = document.getElementById('modal-region').value;
+  const channel = document.getElementById('modal-channel').value;
+  const contact = document.getElementById('modal-contact').value.trim();
+  const note = document.getElementById('modal-note').value.trim();
+
+  const payload = {
+    name: name,
+    region: region,
+    channel: channel,
+    email: contact,
+    note: note,
+    sphere: 'Пользовательская запись',
+    role: 'Свое резюме'
+  };
+
+  try {
+    const res = await fetch('/api/add_company', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      closeModal();
+      loadDataFromDB();
+      return;
+    }
+  } catch (e) {
+    console.warn('Сервер БД недоступен, пишем в LocalStorage');
+  }
+
+  // Fallback
+  const newId = 100 + customList.length + 1;
+  const newCompany = {
+    id: newId,
+    name: name,
+    region: region,
+    isSakhalin: (region === 'Сахалин'),
+    isCustom: true,
+    sphere: 'Пользовательская запись',
+    email: contact,
+    role: 'Свое резюме'
+  };
+  customList.push(newCompany);
+  localStorage.setItem('resume_custom_companies', JSON.stringify(customList));
+  state[newId] = { sent: true, status: 'none', channel: channel, note: note };
+  localStorage.setItem('resume_tracker_v3', JSON.stringify(state));
+  closeModal();
+  render();
+}
+
+function exportCSV() {
+  let csv = "\uFEFF№;Отправлено;Ответ компании;Способ отправки;Заметка;Название компании;Регион;Контакты;Позиция\n";
+  allList.forEach(item => {
+    const s = state[item.id] || { sent: false, status: 'none', channel: 'email', note: '' };
+    const sent = s.sent ? "Да" : "Нет";
+    let st = "Ожидание";
+    if (s.status === 'yes') st = "Да (Ответили)";
+    if (s.status === 'no') st = "Нет (Отказ)";
+    if (s.status === 'noemail') st = "Нет такой почты";
+
+    let ch = "Email";
+    if (s.channel === 'site') ch = "Сайт";
+    if (s.channel === 'hh') ch = "hh.ru";
+    if (s.channel === 'tg') ch = "Telegram";
+
+    csv += `${item.id};${sent};${st};"${ch}";"${s.note || ''}";"${item.name}";"${item.region}";"${item.email || ''}";"${item.role || ''}"\n`;
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "трекер_компаний_андрей_мелехов.csv";
+  a.click();
+}
+
+// Загружаем из базы при открытии страницы
+loadDataFromDB();
+</script>
+
+</body>
+</html>

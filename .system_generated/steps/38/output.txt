@@ -1,0 +1,1 @@
+Encountered error in step execution: Failed to fetch document content at https://api.hh.ru/vacancies?text=системный+администратор&schedule=remote&experience=noExperience&per_page=10&area=113: failed to get URL https://api.hh.ru/vacancies?text=системный+администратор&schedule=remote&experience=noExperience&per_page=10&area=113: status code 403

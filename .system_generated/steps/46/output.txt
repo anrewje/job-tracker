@@ -1,0 +1,14 @@
+
+The command exited with code 0.
+Output:
+
+
+    �⠫�: C:\Users\nise0\.gemini\antigravity\scratch
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+d-----        17.09.2026      1:26                melekhov_resume                                                      
+
+
+

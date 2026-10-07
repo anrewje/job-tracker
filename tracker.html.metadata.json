@@ -1,0 +1,5 @@
+{
+  "summary":  "Интеграция веб-интерфейса tracker.html с базой данных SQLite через REST API (/api/data, /api/save_state, /api/add_company). Автоматически сохраняет любые изменения в файл tracker.db на диске и восстанавливает их при перезапуске.",
+  "updatedAt":  "2026-10-07T08:44:33.208486Z",
+  "userFacing":  true
+}

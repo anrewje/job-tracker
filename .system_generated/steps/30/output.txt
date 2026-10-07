@@ -1,0 +1,1 @@
+Encountered error in step execution: Post "https://daily-cloudcode-pa.googleapis.com/v1internal:generateContent": EOF

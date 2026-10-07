@@ -1,0 +1,14 @@
+The following changes were made by the replace_file_content tool to: C:\Users\nise0\.gemini\antigravity\brain\30bed5c9-865c-4c5d-9d31-8c3a37ed3252\resume.md. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -2,7 +2,7 @@
+ **Junior Network / System Administrator | Remote**
+ 
+ 📍 Южно-Сахалинск (готов к удалённой работе по всей РФ)  
+-📧 [email] | 📱 [телефон] | 💼 [ссылка на GitHub / hh.ru]
++📧 anrewje@gmail.com | 📱 +7 914 763-97-17 | 💼 [github.com/anrewje](https://github.com/anrewje)
+ 
+ ---
+ 
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

@@ -1,0 +1,17 @@
+The following changes were made by the replace_file_content tool to: C:\Users\nise0\.gemini\antigravity\brain\30bed5c9-865c-4c5d-9d31-8c3a37ed3252\resume.md. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -42,9 +42,9 @@
+ 
+ ## Образование
+ 
+-**[Название учебного заведения]**, Южно-Сахалинск  
++**Сахалинский Промышленно-Экономический Техникум (СПЭТ)**, Южно-Сахалинск  
+ Специальность: **09.02.06 Сетевое и системное администрирование**  
+-*20ХХ — 20ХХ (окончание: 20ХХ)*
++*2024 — 2027 (окончание: июнь 2027)*
+ 
+ ---
+ 
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

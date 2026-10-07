@@ -1,0 +1,16 @@
+
+The command exited with code 0.
+Output:
+
+
+    �⠫�: C:\Users\nise0\.gemini\antigravity\scratch\melekhov_resume
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----        17.09.2026      1:26           3155 hh_search.py                                                         
+-a----        17.09.2026      1:27           6491 hh_vacancies.py                                                      
+-a----        17.09.2026      1:27              2 vacancies.json                                                       
+
+
+

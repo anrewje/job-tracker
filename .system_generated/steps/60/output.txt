@@ -1,0 +1,17 @@
+
+The command exited with code 0.
+Output:
+==============================================================
+  � � �
+==============================================================
+
+1. �: https://dev.hh.ru/admin
+2. � � �
+3. �:
+   - �: vacancy-search
+   - redirect_uri: http://localhost:8765/callback
+4. � Client ID � Client Secret
+5. � � � � � � (CLIENT_ID / CLIENT_SECRET)
+6. � �: python hh_vacancies.py
+
+

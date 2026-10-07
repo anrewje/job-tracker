@@ -1,0 +1,7 @@
+Title: Live Content
+
+OG Description: Fetched live
+
+The full content of the article at https://career.habr.com/vacancies?type=all&sort=date&skills[]=linux&skills[]=windows-server&skills[]=cisco&remote=true&qid=1&page=1 has been saved to: C:\Users\nise0\.gemini\antigravity\brain\30bed5c9-865c-4c5d-9d31-8c3a37ed3252\.system_generated\steps\66\content.md
+
+You can use the view_file tool to read specific sections if needed.

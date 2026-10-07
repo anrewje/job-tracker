@@ -1,0 +1,12 @@
+
+The command exited with code 1.
+Output:
+tail : � "tail" � �ᯮ� � � �, �㭪樨, 䠩� �業� � �믮�塞� �ணࠬ�. �஢� �ࠢ�
+쭮� �ᠭ� �, � ⠪� �稥 � �ࠢ�쭮� �, �᫥ 祣� � �.
+�ப�:1 �:37
++ pip install requests --quiet 2>&1 | tail -1
++                                     ~~~~
+    + CategoryInfo          : ObjectNotFound: (tail:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+

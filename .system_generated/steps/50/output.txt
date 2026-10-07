@@ -1,0 +1,48 @@
+
+The command exited with code 0.
+Output:
+==============================================================
+  � � IT-� | � �
+==============================================================
+
+ �: � �
+  [!] � '� �': HTTP Error 403: Forbidden
+   +0 �
+
+ �: � �
+  [!] � '� �': HTTP Error 403: Forbidden
+   +0 �
+
+ �: linux �
+  [!] � 'linux �': HTTP Error 403: Forbidden
+   +0 �
+
+ �: helpdesk
+  [!] � 'helpdesk': HTTP Error 403: Forbidden
+   +0 �
+
+ �: IT �
+  [!] � 'IT �': HTTP Error 403: Forbidden
+   +0 �
+
+ �: NOC �
+  [!] � 'NOC �': HTTP Error 403: Forbidden
+   +0 �
+
+ �: junior devops
+  [!] � 'junior devops': HTTP Error 403: Forbidden
+   +0 �
+
+ �: IT support
+  [!] � 'IT support': HTTP Error 403: Forbidden
+   +0 �
+
+==============================================================
+  � � �: 0
+==============================================================
+
+ � � � vacancies.json
+
+ � � � hh.ru (� � �):
+  https://hh.ru/search/vacancy?schedule=remote&experience=noExperience&text=�+�
+
